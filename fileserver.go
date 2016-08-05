@@ -1,18 +1,39 @@
 package main
 
 import (
+  "fmt"
+  "runtime"
+  "path"
   "os"
-	"fmt"
-  "net/http"
+  "strconv"
+  "github.com/kunterbunt/fileserver/server"
 )
 
 func main() {
+  _, filename, _, ok := runtime.Caller(0)
+  if !ok {
+    panic("No caller information")
+  }
+  // Instantiate server.
+  server := server.NewServer(path.Dir(filename), 8080)
+  // Default port number.
+  port := 8080
+  // We need a directory to serve from.
   if len(os.Args) < 2 {
     fmt.Println("Provide path to serve files from.")
     return
   }
   dir := os.Args[1]
-  fileserver := http.FileServer(http.Dir(dir))
-  http.Handle("/", fileserver)
-  http.ListenAndServe(":3000", nil)
+  // Optionally set the user-provided port, too.
+  if len(os.Args) == 3 {
+    var err error
+    port, err = strconv.Atoi(os.Args[2])
+    if err != nil {
+      panic(err)
+    }
+  }
+  // Fire it up.
+  fmt.Printf("Serving \"" + dir + "\" from port %d.", port)
+  server.ServeFromDirectory("/", dir)
+  server.ListenAndServe()
 }
