@@ -14,8 +14,6 @@ func main() {
   if !ok {
     panic("No caller information")
   }
-  // Instantiate server.
-  server := server.NewServer(path.Dir(filename), 8080)
   // Default port number.
   port := 8080
   // We need a directory to serve from.
@@ -32,6 +30,8 @@ func main() {
       panic(err)
     }
   }
+  // Instantiate server.
+  server := server.NewServer(path.Dir(filename), port)
   // Fire it up.
   fmt.Printf("Serving \"" + dir + "\" from port %d.", port)
   server.ServeFromDirectory("/", dir)
